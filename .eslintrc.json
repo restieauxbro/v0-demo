@@ -8,6 +8,8 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "no-explicit-any": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "no-empty-object-type": "off"
+    "no-empty-object-type": "off",
+    "@typescript-eslint/no-empty-object-type": "off"
+    
   }
 }

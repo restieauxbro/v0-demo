@@ -9,7 +9,8 @@
     "no-explicit-any": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "no-empty-object-type": "off",
-    "@typescript-eslint/no-empty-object-type": "off"
-    
+    "@typescript-eslint/no-empty-object-type": "off",
+    "prefer-const": "off",
+    "@typescript-eslint/prefer-const": "off"
   }
 }

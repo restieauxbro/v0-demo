@@ -16,17 +16,21 @@ async function generateSEMHeadlines(
   const prompt = `
 As an SEM specialist, generate ${numberOfHeadlines} unique and compelling headlines for the following product. Ensure that none of the headlines are duplicates of the existing headings provided. Use the product summary and keywords below to guide your headline creation. The headlines should be engaging and suitable for advertising. 
 
-It is more important to write a compelling headline than it is to stuff a keyword into it. 
+It is more important to write a compelling headline than it is to stuff a keyword into it.
+
+Note also that the keywords may be awkwardly written. For example 'NAB Card' instead of the real name of the product.
 
 Avoid using colons.
 
-Ensure each headline does not exceed 30 characters (including spaces). Do not exceed this limit under any circumstance.
+Ensure each headline does not exceed 30 characters (including spaces). Pay attention to the length of the existing headlines to estimate the character limit.
 
 Avoid using cliche ad copy that is too mentions "today" or "now", or sounding over enthusiastic. "Maximize Your Savings Now" would be better as "Maximize Your Savings"
 
 PRODUCT SUMMARY:
 
 Experience the freedom of low interest rates with the NAB Low Rate Card. This card offers an outstanding balance transfer offer that lets you save on interest with 0% p.a. for 28 months. Plus, enjoy no annual fee for the first year! You can also get up to $300 cash back in the first three months when you spend $500 per month on purchases. This card comes with top-notch fraud protection, ensuring 100% peace of mind with all your transactions. Add an additional cardholder at no extra cost and enjoy special offers on shows, events, experiences, and movies from Visa Entertainment. Apply now and experience the benefits of the NAB Low Rate Card.  
+
+END PRODUCT SUMMARY
 
 KEYWORDS:
 
@@ -40,7 +44,9 @@ KEYWORDS:
 
 [rewards nab credit card]  
 
-[rewards credit card nab] 
+[rewards credit card nab]
+
+END KEYWORDS
 
 EXISTING HEADLINES:
 
@@ -74,7 +80,15 @@ Combine Your Debts Together
 
 Simplify Your Repayments 
 
-Provide the headlines as a numbered list.
+END EXISTING HEADLINES
+
+Provide the headlines as a numbered list. 
+
+Extend the list of headlines by ${numberOfHeadlines} and keep to the same style as the existing headlines. Take note of the style, what works about them. You do not have to write a headline for every proof point in the product summary.
+
+Begin by analysing the existing headlines between <thought> and </thought> tags. Between those tags, identify the key features of the product that are being highlighted, if any very important ones are missed, and if they would resonate with the target audience if expressed as a headline. If the exisiting headlines have addressed key points, consider if they could also be expressed in a slightly different way. Plan what points you will address in the new headlines.
+
+Then, between <headlines> and </headlines> tags, provide the new headlines.
 `;
 
   let generatedHeadlines: string[] = [];
@@ -92,12 +106,13 @@ Provide the headlines as a numbered list.
     console.log(response);
     if (response) {
       // Extract headlines from the response
-      const lines = response.split("\n");
-      for (const line of lines) {
-        const match = line.match(/^\d+\.\s*(.*)/);
-        if (match && match[1]) {
-          generatedHeadlines.push(match[1].trim());
-        }
+      const headlinesMatch = response.match(/<headlines>([\s\S]*?)<\/headlines>/);
+      if (headlinesMatch && headlinesMatch[1]) {
+        const headlinesList = headlinesMatch[1].trim().split('\n');
+        generatedHeadlines = headlinesList.map(line => {
+          const match = line.match(/^\d+\.\s*(.*)/);
+          return match ? match[1].trim() : '';
+        }).filter(headline => headline !== '');
       }
     }
   } catch (error) {
@@ -119,7 +134,11 @@ Provide the headlines as a numbered list.
     }
   }
 
-  console.log(overLimitHeadlines.length !== 0 ? "\n\nshortening headlines" : '\n\nno headlines to shorten');
+  console.log(
+    overLimitHeadlines.length !== 0
+      ? "\n\nshortening headlines"
+      : "\n\nno headlines to shorten"
+  );
 
   // Step 3: Attempt to shorten over-limit headlines
   const shortenedHeadlinesPromises = overLimitHeadlines.map(

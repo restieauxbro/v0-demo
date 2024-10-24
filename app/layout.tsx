@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { cookies } from "next/headers";
+import PasswordPromptDialog from "@/components/auth/password-prompt";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,6 +25,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookiesStore = cookies();
+
+  const hasAccess = cookiesStore.get("hasAccess")?.value === "true";
+  if (!hasAccess) {
+    return (
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {hasAccess ? 'hi' : 'bye'}
+          <PasswordPromptDialog />;
+        </body>
+      </html>
+    );
+  }
   return (
     <html lang="en">
       <body

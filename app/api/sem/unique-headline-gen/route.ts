@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import OpenAI from "openai";
 const openai = new OpenAI();
 
@@ -86,9 +87,9 @@ Provide the headlines as a numbered list.
 
 Extend the list of headlines by ${numberOfHeadlines} and keep to the same style as the existing headlines. Take note of the style, what works about them. You do not have to write a headline for every proof point in the product summary.
 
-Begin by analysing the existing headlines between <thought> and </thought> tags. Between those tags, identify the key features of the product that are being highlighted, if any very important ones are missed, and if they would resonate with the target audience if expressed as a headline. If the exisiting headlines have addressed key points, consider if they could also be expressed in a slightly different way. Plan what points you will address in the new headlines.
+Begin by analysing the existing headlines between <thinking> </thinking> tags. Between those tags, identify the key features of the product that are being highlighted, if any very important ones are missed, and if they would resonate with the target audience if expressed as a headline. If the exisiting headlines have addressed key points, consider if they could also be expressed in a slightly different way. Plan what points you will address in the new headlines.
 
-Then, between <headlines> and </headlines> tags, provide the new headlines.
+Then, between <headlines> </headlines> tags, provide the new headlines.
 `;
 
   let generatedHeadlines: string[] = [];
@@ -97,7 +98,7 @@ Then, between <headlines> and </headlines> tags, provide the new headlines.
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       messages: [
-        { role: "system", content: "You are a helpful assistant." },
+        { role: "system", content: "You are an SEM writing assistant." },
         { role: "user", content: prompt },
       ],
     });
@@ -106,13 +107,17 @@ Then, between <headlines> and </headlines> tags, provide the new headlines.
     console.log(response);
     if (response) {
       // Extract headlines from the response
-      const headlinesMatch = response.match(/<headlines>([\s\S]*?)<\/headlines>/);
+      const headlinesMatch = response.match(
+        /<headlines>([\s\S]*?)<\/headlines>/
+      );
       if (headlinesMatch && headlinesMatch[1]) {
-        const headlinesList = headlinesMatch[1].trim().split('\n');
-        generatedHeadlines = headlinesList.map(line => {
-          const match = line.match(/^\d+\.\s*(.*)/);
-          return match ? match[1].trim() : '';
-        }).filter(headline => headline !== '');
+        const headlinesList = headlinesMatch[1].trim().split("\n");
+        generatedHeadlines = headlinesList
+          .map((line) => {
+            const match = line.match(/^\d+\.\s*(.*)/);
+            return match ? match[1].trim() : "";
+          })
+          .filter((headline) => headline !== "");
       }
     }
   } catch (error) {
@@ -204,6 +209,11 @@ Headline: "${headline}"
 }
 
 export async function GET() {
+  const cookieStore = cookies();
+  const hasAccess = cookieStore.get("hasAccess")?.value === "true" ?? false;
+ if (!hasAccess) {
+   return new Response("Unauthorized", { status: 401 });
+ }
   try {
     const headlineResult = await generateSEMHeadlines("", [], [], 15);
     return Response.json(headlineResult);

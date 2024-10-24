@@ -16,9 +16,10 @@ const PasswordPromptDialog = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
+    console.log("password", password);
     try {
       const result = await checkPassword(password);
+      console.log("result", result);
       if (result) {
         router.refresh();
       } else {
@@ -34,8 +35,10 @@ const PasswordPromptDialog = () => {
 
   return (
     <div className="min-h-screen grid place-items-center">
-      {passwordIncorrect && <p>Password incorrect</p>}
-      <form onSubmit={handleSubmit} className="w-screen max-w-md grid gap-4 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-screen max-w-md grid gap-4 px-4"
+      >
         {/* <label htmlFor="password">Password:</label> */}
         <h1 className="text-center font-extrabold text-3xl lg:text-4xl mb-8">
           Halt, traveller 🔒
@@ -49,6 +52,9 @@ const PasswordPromptDialog = () => {
           placeholder="What's the password?"
           autoFocus
         />
+        {passwordIncorrect && (
+          <p className="text-center text-red-500 text-sm">Incorrect password</p>
+        )}
         <Button type="submit">{loading ? "Loading..." : "Enter"}</Button>
       </form>
     </div>
